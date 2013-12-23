@@ -3,17 +3,54 @@
   <head>
     <meta charset="utf-8">
     <title>Meatamp</title>
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
   </head>
   <body>
-    <ul id="files"></ul>
-    <div id="song">0</div>
-    <button id="prev">Prev</button>
-    <button id="stop">Stop</button>
-    <button id="next">Next</button>
-    <input type="file" id="upload">
-    <button id="add">Add</button>
+    <main class="container">
+      <header>
+        <h1>Meatamp</h1>
+      </header>
 
-    <canvas id="emscripten" style="display: none"></canvas>
+      <section class="file-info">
+        <h2 class="game-name">Mega Man 2</h2>
+        <dl>
+          <dt>System</dt>
+          <dd class="system">NES</dd>
+          <dt>Author</dt>
+          <dd class="author">Chitanda Eru</dd>
+          <dt>Copyright</dt>
+          <dd class="copyright">1989</dd>
+          <dt>Dumper</dt>
+          <dd class="dumper">Spooky Boogie</dd>
+          <dt>Comment</dt>
+          <dd class="comment">Hai!</dd>
+        </dl>
+      </section>
+
+      <section class="track-info">
+        <h3 class="song-name">Cutman's Theme</h3>
+        <dl>
+          <dd>Track</dd>
+          <dt class="track-number">5 / 10</dt>
+          <dd>Length</dd>
+          <dt class="length">3:10</dt>
+        </dl>
+      </section>
+
+      <div class="controls">
+        <button id="prev">Prev</button>
+        <button id="play">Play</button>
+        <button id="pause">Pause</button>
+        <button id="next">Next</button>
+        <div id="choose-file">
+          <button>Choose File</button>
+          <input type="file">
+        </div>
+      </div>
+    </main>
+
+    <canvas id="emscripten"></canvas>
+
     <script src="js/bootstrap.js"></script>
     <script src="js/meatamp.js"></script>
     <script src="js/player.js"></script>

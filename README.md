@@ -1,6 +1,7 @@
 # meatamp
 
-Open web app that plays video game music files, include NSF, SPC, and GBS files.
+Open web app that plays video game music files, including NSF, SPC, and GBS
+files.
 
 ## Developer Setup
 
