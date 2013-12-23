@@ -1,0 +1,23 @@
+{
+  "name": "meatamp",
+  "description": "Open web app for playing video game music files.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Michael Kelly"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Osmose/meatamp.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/Osmose/meatamp/tree/master/LICENSE-MIT"
+    }
+  ],
+  "devDependencies": {
+    "connect": "~2.8.5",
+    "grunt": "~0.4.1",
+    "grunt-gh-pages": "~0.7.1"
+  }
+}
