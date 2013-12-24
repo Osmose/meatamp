@@ -7,5 +7,10 @@
     "name": "Michael Kelly",
     "url": "https://twitter.com/Osmose"
   },
+  "icons": {
+    "16": "/img/icon-16.png",
+    "128": "/img/icon-128.png",
+    "256": "/img/icon-256.png"
+  },
   "default_locale": "en"
 }
