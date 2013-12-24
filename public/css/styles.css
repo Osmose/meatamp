@@ -1,5 +1,15 @@
 /* @global
 -------------------------------------------------- */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: #0C1010;
+    color: #FFFFFF;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
 .emscripten {
     display: none;
 }
@@ -7,6 +17,138 @@
 /* @layout
 -------------------------------------------------- */
 .container {
-    margin: 0 auto;
+    margin: 20px auto;
     width: 600px;
+}
+
+/* @header
+-------------------------------------------------- */
+.top-bar {
+    background: #BB492D;
+    color: #FFFFFF;
+    padding: 10px;
+}
+
+.top-bar h1 {
+    font-size: 30px;
+}
+
+.top-bar-icon {
+    color: #FFF;
+    float: right;
+    font-size: 30px;
+}
+
+/* @info
+-------------------------------------------------- */
+.info {
+    background: #EAEAE7;
+    color: #2C393B;
+    padding: 30px 15px;
+}
+
+.info p {
+    line-height: 22px;
+    margin-bottom: 14px;
+}
+
+.info a {
+    color: #BB492D;
+}
+
+/* @metadata
+-------------------------------------------------- */
+.choose-file-msg {
+    background: #333333;
+    padding: 30px 15px;
+}
+
+.choose-file-msg p {
+    line-height: 22px;
+    margin-bottom: 14px;
+}
+
+.choose-file-msg a {
+    color: #BB492D;
+}
+
+.metadata {
+    background: #333333;
+    display: flex;
+    flex-direction: row;
+}
+
+.system {
+    flex: 1;
+    padding: 8px;
+}
+
+.system img {
+    width: 100%;
+}
+
+.file-info {
+    flex: 2;
+    padding: 8px;
+}
+
+.file-info h2 {
+    font-size: 24px;
+    padding: 6px;
+}
+
+.file-info dl {
+    line-height: 22px;
+}
+
+.file-info dt {
+    clear: left;
+    color: #8B8F8F;
+    float: left;
+    margin-right: 8px;
+    text-align: right;
+    width: 90px;
+}
+
+.file-info dd {
+    margin-left: 98px;
+}
+
+/* @controls
+-------------------------------------------------- */
+.controls {
+    display: flex;
+    flex-direction: row;
+}
+
+.controls .button {
+    background: #F4F4F4;
+    border: none;
+    border-right: 2px solid #333333;
+    color: #333333;
+    cursor: pointer;
+    flex: 1;
+    font-size: 30px;
+    line-height: 17px;
+    overflow: hidden;
+    text-align: center;
+}
+
+.controls .button:last-child {
+    border: none;
+}
+
+#choose-file {
+    position: relative;
+    z-index: 1;
+}
+
+#choose-file input[type='file'] {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    opacity: 0;
+    right: 0;
+    top: 0;
+    z-index: 2;
 }

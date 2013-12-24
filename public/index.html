@@ -3,47 +3,65 @@
   <head>
     <meta charset="utf-8">
     <title>Meatamp</title>
+    <link rel="stylesheet" type="text/css" href="css/reset.css">
+    <link rel="stylesheet" type="text/css" href="css/fontello.css">
     <link rel="stylesheet" type="text/css" href="css/styles.css">
   </head>
   <body>
     <main class="container">
-      <header>
+      <header class="top-bar">
+        <a href="https://github.com/Osmose/meatamp" class="top-bar-icon">
+          <i class="icon-github-circled-alt2"></i>
+        </a>
+        <a href="#info" id="info-button" class="top-bar-icon">
+          <i class="icon-info-circled-alt"></i>
+        </a>
         <h1>Meatamp</h1>
       </header>
 
-      <section class="file-info">
-        <h2 class="game-name">Mega Man 2</h2>
-        <dl>
-          <dt>System</dt>
-          <dd class="system">NES</dd>
-          <dt>Author</dt>
-          <dd class="author">Chitanda Eru</dd>
-          <dt>Copyright</dt>
-          <dd class="copyright">1989</dd>
-          <dt>Dumper</dt>
-          <dd class="dumper">Spooky Boogie</dd>
-          <dt>Comment</dt>
-          <dd class="comment">Hai!</dd>
-        </dl>
-      </section>
+      <div class="info">
+        <p>Meatamp was made by <a href="https://twitter.com/osmose">@Osmose</a>.</p>
+        <p>It uses <a href="http://www.slack.net/~ant/libs/audio.html#Game_Music_Emu">Game_Music_Emu by Blargg</a>, which is compiled to JavaScript via <a href="http://emscripten.org/">Emscripten</a>. The Game_Music_Emu page has info on which file formats are supported.</p>
+        <p>Note that the music will stutter if the tab is unfocused because the audio samples are currently being generated on demand for SDL in the UI thread. This will hopefully go away in the future.</p>
+      </div>
 
-      <section class="track-info">
-        <h3 class="song-name">Cutman's Theme</h3>
-        <dl>
-          <dd>Track</dd>
-          <dt class="track-number">5 / 10</dt>
-          <dd>Length</dd>
-          <dt class="length">3:10</dt>
-        </dl>
-      </section>
+      <div class="choose-file-msg">
+        <p>Meatamp is a music player for video game sound formats, such as NSF, SPC, and GBS files.</p>
+        <p>You can grab some NSF files to test this out from <a href="http://chipmusic.org/music#t=nsf">chipmusic.org</a>.</p>
+        <p>Use the <i class="icon-folder-open"></i> button to select a file to play.</p>
+      </div>
+
+      <div class="metadata">
+        <figure class="system">
+          <img>
+        </figure>
+
+        <section class="file-info">
+          <h2 class="track-name"></h2>
+          <dl>
+            <dt>Track</dt>
+            <dd class="track"></dd>
+            <dt>System</dt>
+            <dd class="system-name"></dd>
+            <dt>Author</dt>
+            <dd class="author"></dd>
+            <dt>Copyright</dt>
+            <dd class="copyright"></dd>
+            <dt>Dumper</dt>
+            <dd class="dumper"></dd>
+            <dt>Comment</dt>
+            <dd class="comment"></dd>
+          </dl>
+        </section>
+      </div>
 
       <div class="controls">
-        <button id="prev">Prev</button>
-        <button id="play">Play</button>
-        <button id="pause">Pause</button>
-        <button id="next">Next</button>
-        <div id="choose-file">
-          <button>Choose File</button>
+        <button id="prev" class="button"><i class="icon-to-start"></i></button>
+        <button id="play" class="button"><i class="icon-play"></i></button>
+        <button id="pause" class="button"><i class="icon-pause"></i></button>
+        <button id="next" class="button"><i class="icon-to-end"></i></button>
+        <div id="choose-file" class="button">
+          <i class="icon-folder-open"></i>
           <input type="file">
         </div>
       </div>
@@ -51,6 +69,7 @@
 
     <canvas id="emscripten"></canvas>
 
+    <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
     <script src="js/bootstrap.js"></script>
     <script src="js/meatamp.js"></script>
     <script src="js/player.js"></script>

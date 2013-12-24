@@ -3,9 +3,13 @@
 #include "SDL.h"
 #include "gme.h"
 
+const char* info_fmt = "{\"trackCount\": %d, \"length\": %d, \"system\": \"%s\", \"game\": \"%s\", \"song\": \"%s\", \"author\": \"%s\", \"copyright\": \"%s\", \"comment\": \"%s\", \"dumper\": \"%s\"}";
+
 static int sample_rate;
 static Music_Emu* emu;
 static SDL_AudioSpec want, have;
+static track_info_t track_info;
+static char json_str[2048];
 
 void meatCallback(void* userdata, Uint8* stream, int len);
 void handle_error(const char* str);
@@ -58,6 +62,23 @@ void meatCallback(void* userdata, Uint8* stream, int len) {
 void meatExit() {
     sound_cleanup();
     SDL_QuitSubSystem(SDL_INIT_AUDIO);
+}
+
+void meatPause() {
+    sound_stop();
+}
+
+void meatUnpause() {
+    sound_start();
+}
+
+char* meatInfo(int track) {
+    handle_error(gme_track_info(emu, &track_info, track));
+
+    sprintf(json_str, info_fmt, track_info.track_count, track_info.length,
+            track_info.system, track_info.game, track_info.song, track_info.author,
+            track_info.copyright, track_info.comment, track_info.dumper);
+    return json_str;
 }
 
 static void sound_start()

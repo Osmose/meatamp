@@ -22,8 +22,10 @@ The steps below assume you have [Emscripten](http://emscripten.org) and
 
 There are sample music files in the `sample_music` folder for testing playback.
 
-## License
+## License & Copyright
 
 - Meatamp is licensed under the  MIT license. See `LICENSE_MIT` for more info.
 - Game_Music_Emu library is licensed under the LGPL v2.1. See
   `src/game_music_emu/license.txt` for details.
+- Game controller icons by Jojo Mendoza (http://deleket.com/).
+  Thanks for allowing non-commercial use!

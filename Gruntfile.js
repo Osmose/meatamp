@@ -27,11 +27,11 @@ module.exports = function(grunt) {
         var source_files = ['src/meatamp.c'].concat(gme_files);
         outfile = outfile || 'public/js/meatamp.js';
         var flags = [
-            '-s ASM_JS=1',
-            '-s EXPORTED_FUNCTIONS=@src/exported_functions.json',
+            '-s', 'ASM_JS=1',
+            '-s', 'EXPORTED_FUNCTIONS=@src/exported_functions.json',
             '-O1',
             '-I' + gme_dir,
-            '-o ' + outfile,
+            '-o',  outfile,
 
             // GCC/Clang arguments to shut up about warnings in code I didn't
             // write. :D
@@ -44,7 +44,6 @@ module.exports = function(grunt) {
         grunt.log.writeln('Compiling via emscripten to ' + outfile);
         var build_proc = spawn(emcc, args, {stdio: 'inherit'});
         build_proc.on('exit', function() {
-            grunt.file.delete('a.out.js');
             cb();
         });
     });
