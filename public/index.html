@@ -31,6 +31,7 @@
         <p>Meatamp was made by <a href="https://twitter.com/osmose">@Osmose</a>.</p>
         <p>It uses <a href="http://www.slack.net/~ant/libs/audio.html#Game_Music_Emu">Game_Music_Emu by Blargg</a>, which is compiled to JavaScript via <a href="http://emscripten.org/">Emscripten</a>. The Game_Music_Emu page has info on which file formats are supported.</p>
         <p>Note that the music will stutter if the tab is unfocused because the audio samples are currently being generated on demand for SDL in the UI thread. This will hopefully go away in the future.</p>
+        <p>Meatamp has only been tested on Firefox Nightly thusfar. If you find bugs in other versions/browsers, feel free to <a href="https://github.com/Osmose/meatamp/issues">file an issue</a>, although I make no promises of issues ever getting fixed.</p>
       </div>
 
       <div id="choose-file-msg" class="msg">
@@ -78,6 +79,7 @@
     <canvas id="emscripten"></canvas>
 
     <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script src="js/keymaster.js"></script>
     <script src="js/bootstrap.js"></script>
     <script src="js/meatamp.js"></script>
     <script src="js/player.js"></script>

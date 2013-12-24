@@ -1,4 +1,4 @@
-;(function($) {
+;(function($, key) {
     'use strict';
     // Wrapped C functions for making the playback happen.
     var meatInit = Module.cwrap('meatInit', null, ['number', 'number']);
@@ -18,7 +18,8 @@
                 'Super Nintendo': 'img/snes.png',
                 'Game Boy': 'img/gameboy.png',
                 'Sega Genesis': 'img/genesis.png',
-                'Sega Mega Drive / Genesis': 'img/mega_drive.png'
+                'Sega Mega Drive / Genesis': 'img/mega_drive.png',
+                'Famicom': 'img/famicom.png'
             }
         },
 
@@ -80,6 +81,19 @@
             meatamp.dom.infoButton.click(meatamp.controls.toggleInfo);
             meatamp.dom.install.click(meatamp.controls.install);
             meatamp.dom.alert.find('.dismiss').click(meatamp.controls.dismissAlert);
+
+            // Bind keyboard shortcuts as well!
+            key('space', function() {
+                if (meatamp.playing) {
+                    meatamp.controls.pause();
+                } else {
+                    meatamp.controls.play();
+                }
+            });
+            key('right', meatamp.controls.next);
+            key('left', meatamp.controls.prev);
+            key('esc', meatamp.controls.dismissAlert);
+            key('f1', meatamp.controls.toggleInfo);
         },
 
         updateInfo: function() {
@@ -192,4 +206,4 @@
         meatamp.init();
         meatamp.bindControls();
     });
-})(window.jQuery);
+})(window.jQuery, window.keymaster);
