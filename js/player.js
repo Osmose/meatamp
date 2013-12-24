@@ -34,7 +34,7 @@
 
             // Grab all the dom stuff we'll need.
             meatamp.dom.metadata = $('.metadata');
-            meatamp.dom.chooseFileMsg = $('.choose-file-msg');
+            meatamp.dom.chooseFileMsg = $('#choose-file-msg');
             meatamp.dom.system = $('.system');
             meatamp.dom.trackName = $('.track-name');
             meatamp.dom.track = $('.track');
@@ -172,7 +172,7 @@
 
             install: function(e) {
                 e.preventDefault();
-                var request = window.navigator.mozApps.install('/manifest.webapp');
+                var request = window.navigator.mozApps.install('http://meatamp.mkelly.me/manifest.webapp');
                 request.onsuccess = function() {
                     meatamp.alert('Thanks for installing Meatamp!');
                 };
