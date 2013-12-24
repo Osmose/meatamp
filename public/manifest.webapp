@@ -2,10 +2,15 @@
   "name": "Meatamp",
   "description": "Plays video game music files, including NSF, SPC, and GBS files.",
   "version": "0.1",
-  "launch_path": "/meatamp/",
+  "launch_path": "/",
   "developer": {
     "name": "Michael Kelly",
     "url": "https://twitter.com/Osmose"
+  },
+  "icons": {
+    "16": "/img/icon-16.png",
+    "128": "/img/icon-128.png",
+    "256": "/img/icon-256.png"
   },
   "default_locale": "en"
 }

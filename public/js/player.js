@@ -34,7 +34,7 @@
 
             // Grab all the dom stuff we'll need.
             meatamp.dom.metadata = $('.metadata');
-            meatamp.dom.chooseFileMsg = $('.choose-file-msg');
+            meatamp.dom.chooseFileMsg = $('#choose-file-msg');
             meatamp.dom.system = $('.system');
             meatamp.dom.trackName = $('.track-name');
             meatamp.dom.track = $('.track');
@@ -48,13 +48,27 @@
             meatamp.dom.pause = $('#pause');
             meatamp.dom.next = $('#next');
             meatamp.dom.chooseFile = $('#choose-file input');
-            meatamp.dom.info = $('.info');
+            meatamp.dom.info = $('#info');
             meatamp.dom.infoButton = $('#info-button');
+            meatamp.dom.install = $('#install-button');
+            meatamp.dom.alert = $('#alert');
 
-            // Hide stuff until playback begins.
+            // Hide stuff until needed.
             meatamp.dom.pause.hide();
             meatamp.dom.metadata.hide();
             meatamp.dom.info.hide();
+            meatamp.dom.alert.hide();
+        },
+
+        alert: function(msg) {
+            if (meatamp.dom.alert.is(':visible')) {
+                meatamp.dom.alert.slideUp();
+            }
+
+            meatamp.dom.alert.promise().done(function() {
+                meatamp.dom.alert.find('p').text(msg);
+                meatamp.dom.alert.slideDown();
+            });
         },
 
         bindControls: function() {
@@ -64,6 +78,8 @@
             meatamp.dom.play.click(meatamp.controls.play);
             meatamp.dom.chooseFile.change(meatamp.controls.chooseFile);
             meatamp.dom.infoButton.click(meatamp.controls.toggleInfo);
+            meatamp.dom.install.click(meatamp.controls.install);
+            meatamp.dom.alert.find('.dismiss').click(meatamp.controls.dismissAlert);
         },
 
         updateInfo: function() {
@@ -149,8 +165,25 @@
                 reader.readAsArrayBuffer(file);
             },
 
-            toggleInfo: function() {
+            toggleInfo: function(e) {
+                e.preventDefault();
                 meatamp.dom.info.slideToggle();
+            },
+
+            install: function(e) {
+                e.preventDefault();
+                var request = window.navigator.mozApps.install('http://meatamp.mkelly.me/manifest.webapp');
+                request.onsuccess = function() {
+                    meatamp.alert('Thanks for installing Meatamp!');
+                };
+                request.onerror = function() {
+                    meatamp.alert('Error installing Meatamp: ' + this.error.name);
+                };
+            },
+
+            dismissAlert: function(e) {
+                e.preventDefault();
+                meatamp.dom.alert.slideUp();
             }
         }
     };
