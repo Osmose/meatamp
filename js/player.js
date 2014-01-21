@@ -11,7 +11,7 @@
 
     var meatamp = {
         config: {
-            frequency: 48000,
+            frequency: 44100,
             samples: 8192,
             systemImages: {
                 'Nintendo NES': 'img/nes.png',
@@ -169,7 +169,10 @@
                 var file = input.files[0];
                 var reader = new FileReader();
                 reader.onloadend = function(e) {
-                    FS.writeFile(file.name, new Int8Array(reader.result), {flags: 'w', encoding: 'binary'});
+                    FS.writeFile(file.name, new Int8Array(reader.result), {
+                        flags: 'w',
+                        encoding: 'binary'
+                    });
                     meatamp.song = 0;
                     meatamp.currentFile = file.name;
                     meatPlay(file.name, meatamp.song);
