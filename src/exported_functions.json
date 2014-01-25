@@ -1,1 +1,1 @@
-["_meatInit", "_meatPlay", "_meatExit", "_meatChangeTrack", "_meatInfo", "_meatPause", "_meatUnpause"]
+["_meat_open_file", "_meat_generate_sound_data", "_meat_song_info", "_meat_start_track"]

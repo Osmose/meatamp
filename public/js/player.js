@@ -1,18 +1,13 @@
 ;(function($, key) {
     'use strict';
     // Wrapped C functions for making the playback happen.
-    var meatInit = Module.cwrap('meatInit', null, ['number', 'number']);
-    var meatExit = Module.cwrap('meatExit', null);
-    var meatPlay = Module.cwrap('meatPlay', null, ['string', 'number']);
-    var meatChangeTrack = Module.cwrap('meatChangeTrack', null, ['number']);
-    var meatInfo = Module.cwrap('meatInfo', 'string', ['number']);
-    var meatPause = Module.cwrap('meatPause', null);
-    var meatUnpause = Module.cwrap('meatUnpause', null);
+    var meatOpenFile = Module.cwrap('meat_open_file', null, ['string', 'number']);
+    var meatGenerateSoundData = Module.cwrap('meat_generate_sound_data', 'number');
+    var meatSongInfo = Module.cwrap('meat_song_info', 'string', ['number']);
+    var meatStartTrack = Module.cwrap('meat_start_track', null, ['number']);
 
     var meatamp = {
         config: {
-            frequency: 44100,
-            samples: 8192,
             systemImages: {
                 'Nintendo NES': 'img/nes.png',
                 'Super Nintendo': 'img/snes.png',
@@ -31,7 +26,6 @@
 
         init: function() {
             meatamp.song = 0;
-            meatInit(meatamp.config.frequency, meatamp.config.samples);
 
             // Grab all the dom stuff we'll need.
             meatamp.dom.metadata = $('.metadata');
@@ -83,7 +77,7 @@
             meatamp.dom.alert.find('.dismiss').click(meatamp.controls.dismissAlert);
 
             // Bind keyboard shortcuts as well!
-            key('space', function() {
+            key('p', function() {
                 if (meatamp.playing) {
                     meatamp.controls.pause();
                 } else {
@@ -93,11 +87,18 @@
             key('right', meatamp.controls.next);
             key('left', meatamp.controls.prev);
             key('esc', meatamp.controls.dismissAlert);
-            key('f1', meatamp.controls.toggleInfo);
+            key('h', meatamp.controls.toggleInfo);
+
+            // Capture key events even when inputs are focused.
+            // This is not great for accessibility, and I am a bad person for
+            // doing this. :(
+            key.filter = function() {
+                return true;
+            };
         },
 
         updateInfo: function() {
-            var info = JSON.parse(meatInfo(meatamp.song));
+            var info = JSON.parse(meatSongInfo(meatamp.song));
             meatamp.trackCount = info.trackCount;
 
             var songTitle = info.game;
@@ -122,12 +123,27 @@
             meatamp.dom.metadata.show();
         },
 
+        synthCallback: function(left, right, bufferSize) {
+            if (!meatamp.playing) {
+                for (var k = 0; k < bufferSize; k++) {
+                    left[k] = 0;
+                    right[k] = 0;
+                }
+            } else {
+                var ptr = meatGenerateSoundData();
+                for (var i = 0; i < bufferSize; i++) {
+                    left[i] = Module.getValue(ptr + (i * 4), 'i16');
+                    right[i] = Module.getValue(ptr + (i * 4) + 2, 'i16');
+                }
+            }
+        },
+
         controls: {
             prev: function() {
                 if (meatamp.song > 0) {
                     meatamp.song--;
                 }
-                meatChangeTrack(meatamp.song);
+                meatStartTrack(meatamp.song);
                 meatamp.controls.play();
                 meatamp.updateInfo();
             },
@@ -136,14 +152,14 @@
                 if (meatamp.song < meatamp.trackCount - 1) {
                     meatamp.song++;
                 }
-                meatChangeTrack(meatamp.song);
+                meatStartTrack(meatamp.song);
                 meatamp.controls.play();
                 meatamp.updateInfo();
             },
 
             pause: function() {
                 if (meatamp.playing) {
-                    meatPause();
+                    audioPlayer.paused = true;
                     meatamp.playing = false;
                     meatamp.dom.pause.hide();
                     meatamp.dom.play.show();
@@ -152,7 +168,7 @@
 
             play: function() {
                 if (!meatamp.playing && meatamp.currentFile !== null) {
-                    meatUnpause();
+                    audioPlayer.paused = false;
                     meatamp.playing = true;
                     meatamp.dom.play.hide();
                     meatamp.dom.pause.show();
@@ -169,13 +185,10 @@
                 var file = input.files[0];
                 var reader = new FileReader();
                 reader.onloadend = function(e) {
-                    FS.writeFile(file.name, new Int8Array(reader.result), {
-                        flags: 'w',
-                        encoding: 'binary'
-                    });
+                    FS.writeFile(file.name, new Int8Array(reader.result), {flags: 'w', encoding: 'binary'});
                     meatamp.song = 0;
                     meatamp.currentFile = file.name;
-                    meatPlay(file.name, meatamp.song);
+                    meatOpenFile(file.name, meatamp.song);
                     meatamp.controls.play();
                     meatamp.updateInfo();
                 };
@@ -205,8 +218,68 @@
         }
     };
 
+    var audioPlayer = {
+        MAX_VOLUME: 0.0001,
+
+        paused: true,
+
+        init: function(synthCallback, bufferSize) {
+            audioPlayer.context = audioPlayer.createContext();
+            if (audioPlayer.context === null) {
+                console.log('Web Audio API support not found, audio will not play.');
+                return false;
+            }
+
+            audioPlayer.scriptProcessor = audioPlayer.createScriptProcessor(bufferSize);
+            audioPlayer.scriptProcessor.onaudioprocess = function(e) {
+                var left = e.outputBuffer.getChannelData(0);
+                var right = e.outputBuffer.getChannelData(1);
+                synthCallback(left, right, bufferSize);
+            };
+
+            audioPlayer.gain = audioPlayer.createGain();
+            audioPlayer.setVolume(0.5);
+
+            audioPlayer.scriptProcessor.connect(audioPlayer.gain);
+            audioPlayer.gain.connect(audioPlayer.context.destination);
+        },
+
+        setVolume: function(volume) {
+            audioPlayer.gain.gain.value = volume * audioPlayer.MAX_VOLUME;
+        },
+
+        createContext: function() {
+            if (window.AudioContext) {
+                return new AudioContext();
+            } else if (window.webkitAudioContext) {
+                return new webkitAudioContext();
+            } else {
+                return null;
+            }
+        },
+
+        createScriptProcessor: function(bufferSize) {
+            var func = (audioPlayer.context.createScriptProcessor ||
+                        audioPlayer.context.createJavaScriptNode ||
+                        noop);
+            return func.call(audioPlayer.context, bufferSize, 1, 2);
+        },
+
+        createGain: function() {
+            var func = (audioPlayer.context.createGain ||
+                        audioPlayer.context.createGainNode ||
+                        noop);
+            return func.call(audioPlayer.context);
+        }
+    };
+
+    function noop() {
+        return null;
+    }
+
     $(function() {
         meatamp.init();
+        audioPlayer.init(meatamp.synthCallback, 8192);
         meatamp.bindControls();
     });
 })(window.jQuery, window.keymaster);
