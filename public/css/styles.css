@@ -18,7 +18,23 @@ body {
 -------------------------------------------------- */
 .container {
     margin: 20px auto;
-    width: 600px;
+    height: 480px;
+    width: 640px;
+}
+
+@media all and (max-width: 640px) {
+    .container {
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        left: 0;
+        margin: 0 auto;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 100%;
+    }
 }
 
 /* @header
@@ -26,16 +42,23 @@ body {
 .top-bar {
     background: #BB492D;
     color: #FFFFFF;
-    padding: 10px;
+    padding: 5px;
 }
 
 .top-bar h1 {
-    font-size: 30px;
+    font-size: 28px;
+}
+
+.top-bar h1 img {
+    margin-right: 10px;
+}
+
+.header-logo {
+    height: 30px;
 }
 
 .top-bar-icon {
     color: #FFF;
-    float: right;
     font-size: 30px;
 }
 
@@ -49,7 +72,6 @@ body {
 
 .msg p {
     line-height: 22px;
-    margin-bottom: 14px;
 }
 
 .msg a {
@@ -64,7 +86,7 @@ body {
 
 #alert p {
     line-height: 30px;
-    margin: 0;
+    margin: 0 0 10px;
 }
 
 #alert .dismiss {
@@ -137,6 +159,7 @@ body {
 .controls {
     display: flex;
     flex-direction: row;
+    height: 46px;
 }
 
 .controls .button {
@@ -147,7 +170,8 @@ body {
     cursor: pointer;
     flex: 1;
     font-size: 30px;
-    line-height: 17px;
+    height: 40px;
+    line-height: 40px;
     overflow: hidden;
     text-align: center;
 }
