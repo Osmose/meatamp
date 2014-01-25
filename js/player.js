@@ -7,6 +7,10 @@
     var meatStartTrack = Module.cwrap('meat_start_track', null, ['number']);
 
     var meatamp = {
+        CHOOSE_FILE_INDEX: 0,
+        INFO_INDEX: 1,
+        METADATA_INDEX: 2,
+
         config: {
             systemImages: {
                 'Nintendo NES': 'img/nes.png',
@@ -44,14 +48,14 @@
             meatamp.dom.next = $('#next');
             meatamp.dom.chooseFile = $('#choose-file input');
             meatamp.dom.info = $('#info');
+            meatamp.dom.metadataButton = $('#metadata-button');
             meatamp.dom.infoButton = $('#info-button');
             meatamp.dom.install = $('#install-button');
             meatamp.dom.alert = $('#alert');
+            meatamp.dom.mainDeck = $('#main-deck')[0];
 
             // Hide stuff until needed.
             meatamp.dom.pause.hide();
-            meatamp.dom.metadata.hide();
-            meatamp.dom.info.hide();
             meatamp.dom.alert.hide();
         },
 
@@ -72,7 +76,8 @@
             meatamp.dom.pause.click(meatamp.controls.pause);
             meatamp.dom.play.click(meatamp.controls.play);
             meatamp.dom.chooseFile.change(meatamp.controls.chooseFile);
-            meatamp.dom.infoButton.click(meatamp.controls.toggleInfo);
+            meatamp.dom.metadataButton.click(meatamp.controls.showMetadata);
+            meatamp.dom.infoButton.click(meatamp.controls.showInfo);
             meatamp.dom.install.click(meatamp.controls.install);
             meatamp.dom.alert.find('.dismiss').click(meatamp.controls.dismissAlert);
 
@@ -87,7 +92,7 @@
             key('right', meatamp.controls.next);
             key('left', meatamp.controls.prev);
             key('esc', meatamp.controls.dismissAlert);
-            key('h', meatamp.controls.toggleInfo);
+            key('h', meatamp.controls.showInfo);
 
             // Capture key events even when inputs are focused.
             // This is not great for accessibility, and I am a bad person for
@@ -118,9 +123,6 @@
             meatamp.dom.copyright.text(info.copyright);
             meatamp.dom.dumper.text(info.dumper);
             meatamp.dom.comment.text(info.comment);
-
-            meatamp.dom.chooseFileMsg.hide();
-            meatamp.dom.metadata.show();
         },
 
         synthCallback: function(left, right, bufferSize) {
@@ -191,13 +193,19 @@
                     meatOpenFile(file.name, meatamp.song);
                     meatamp.controls.play();
                     meatamp.updateInfo();
+                    meatamp.dom.mainDeck.shuffleTo(meatamp.METADATA_INDEX);
                 };
                 reader.readAsArrayBuffer(file);
             },
 
-            toggleInfo: function(e) {
+            showInfo: function(e) {
                 e.preventDefault();
-                meatamp.dom.info.slideToggle();
+                meatamp.dom.mainDeck.shuffleTo(meatamp.INFO_INDEX);
+            },
+
+            showMetadata: function(e) {
+                e.preventDefault();
+                meatamp.dom.mainDeck.shuffleTo(meatamp.METADATA_INDEX);
             },
 
             install: function(e) {
@@ -277,7 +285,7 @@
         return null;
     }
 
-    $(function() {
+    $(document).on('DOMComponentsLoaded', function() {
         meatamp.init();
         audioPlayer.init(meatamp.synthCallback, 8192);
         meatamp.bindControls();
