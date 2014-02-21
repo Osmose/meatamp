@@ -6,6 +6,101 @@
     var meatSongInfo = Module.cwrap('meat_song_info', 'string', ['number']);
     var meatStartTrack = Module.cwrap('meat_start_track', null, ['number']);
 
+
+    var BUFFER_SIZE = 8192;
+    var GAME_AUDIO_MAX_VOLUME = 0.0001;
+    var GAME_AUDIO_FORMATS = ['ay', 'gbs', 'gym', 'hes', 'kss', 'nsf', 'nsfe',
+                              'sap', 'spc', 'vgm', 'vyz'];
+
+
+    function GameMediaFile(context, file) {
+        var self = this;
+        this.context = context;
+        this.silent = false;
+        this.track = 0;
+        this.name = file.name;
+
+        this.load = $.Deferred();
+        var reader = new FileReader();
+        reader.onloadend = function(e) {
+            FS.writeFile(self.name, new Int8Array(reader.result), {flags: 'w', encoding: 'binary'});
+            self.createAudioNodes();
+            self.load.resolve(self);
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    GameMediaFile.prototype = {
+        createAudioNodes: function() {
+            var self = this;
+
+            this.scriptProcessor = this.createScriptProcessor();
+            this.scriptProcessor.onaudioprocess = function(e) {
+                var left = e.outputBuffer.getChannelData(0);
+                var right = e.outputBuffer.getChannelData(1);
+
+                if (self.silent) {
+                    for (var k = 0; k < BUFFER_SIZE; k++) {
+                        left[k] = 0;
+                        right[k] = 0;
+                    }
+                } else {
+                    var ptr = meatGenerateSoundData();
+                    for (var i = 0; i < BUFFER_SIZE; i++) {
+                        left[i] = Module.getValue(ptr + (i * 4), 'i16');
+                        right[i] = Module.getValue(ptr + (i * 4) + 2, 'i16');
+                    }
+                }
+            };
+
+            this.gain = this.createGain();
+            this.setVolume(0.5);
+
+            this.scriptProcessor.connect(this.gain);
+        },
+
+        createScriptProcessor: function() {
+            var func = (this.context.createScriptProcessor ||
+                        this.context.createJavaScriptNode ||
+                        noop);
+            return func.call(this.context, BUFFER_SIZE, 1, 2);
+        },
+
+        createGain: function() {
+            var func = (this.context.createGain ||
+                        this.context.createGainNode ||
+                        noop);
+            return func.call(this.context);
+        },
+
+        setVolume: function(volume) {
+            this.gain.gain.value = volume * GAME_AUDIO_MAX_VOLUME;
+        },
+
+        getInfo: function() {
+            return JSON.parse(meatSongInfo(this.track));
+        },
+
+        play: function() {
+            meatOpenFile(this.name, this.track);
+            this.gain.connect(this.context.destination);
+        },
+
+        pause: function() {
+            this.silent = !this.silent;
+        },
+
+        stop: function() {
+            this.gain.disconnect();
+        },
+
+        setTrack: function(track) {
+            this.track = track;
+            meatStartTrack(track);
+        }
+    };
+
+
     var meatamp = {
         CHOOSE_FILE_INDEX: 0,
         INFO_INDEX: 1,
@@ -22,15 +117,10 @@
             }
         },
 
-        song: 0,
-        currentFile: null,
-        trackCount: 1,
-        playing: false,
+        mediaFile: null,
         dom: {}, // Stores jQuery objects for dom manipulation.
 
         init: function() {
-            meatamp.song = 0;
-
             // Grab all the dom stuff we'll need.
             meatamp.dom.metadata = $('.metadata');
             meatamp.dom.chooseFileMsg = $('#choose-file-msg');
@@ -57,6 +147,14 @@
             // Hide stuff until needed.
             meatamp.dom.pause.hide();
             meatamp.dom.alert.hide();
+
+            if (window.AudioContext) {
+                meatamp.context = new AudioContext();
+            } else if (window.webkitAudioContext) {
+                meatamp.context = new webkitAudioContext();
+            } else {
+                meatamp.alert('Web Audio Support not found!');
+            }
         },
 
         alert: function(msg) {
@@ -103,7 +201,7 @@
         },
 
         updateInfo: function() {
-            var info = JSON.parse(meatSongInfo(meatamp.song));
+            var info = meatamp.mediaFile.getInfo();
             meatamp.trackCount = info.trackCount;
 
             var songTitle = info.game;
@@ -125,56 +223,27 @@
             meatamp.dom.comment.text(info.comment);
         },
 
-        synthCallback: function(left, right, bufferSize) {
-            if (!meatamp.playing) {
-                for (var k = 0; k < bufferSize; k++) {
-                    left[k] = 0;
-                    right[k] = 0;
-                }
-            } else {
-                var ptr = meatGenerateSoundData();
-                for (var i = 0; i < bufferSize; i++) {
-                    left[i] = Module.getValue(ptr + (i * 4), 'i16');
-                    right[i] = Module.getValue(ptr + (i * 4) + 2, 'i16');
-                }
-            }
-        },
-
         controls: {
             prev: function() {
-                if (meatamp.song > 0) {
-                    meatamp.song--;
-                }
-                meatStartTrack(meatamp.song);
-                meatamp.controls.play();
+                meatamp.mediaFile.setTrack(meatamp.mediaFile.track - 1);
                 meatamp.updateInfo();
             },
 
             next: function() {
-                if (meatamp.song < meatamp.trackCount - 1) {
-                    meatamp.song++;
-                }
-                meatStartTrack(meatamp.song);
-                meatamp.controls.play();
+                meatamp.mediaFile.setTrack(meatamp.mediaFile.track + 1);
                 meatamp.updateInfo();
             },
 
             pause: function() {
-                if (meatamp.playing) {
-                    audioPlayer.paused = true;
-                    meatamp.playing = false;
-                    meatamp.dom.pause.hide();
-                    meatamp.dom.play.show();
-                }
+                meatamp.mediaFile.pause();
             },
 
             play: function() {
-                if (!meatamp.playing && meatamp.currentFile !== null) {
-                    audioPlayer.paused = false;
-                    meatamp.playing = true;
-                    meatamp.dom.play.hide();
-                    meatamp.dom.pause.show();
-                }
+                meatamp.mediaFile.load.then(function(mediaFile) {
+                    mediaFile.play();
+                });
+                meatamp.dom.play.hide();
+                meatamp.dom.pause.show();
             },
 
             chooseFile: function(e) {
@@ -185,17 +254,7 @@
 
                 // Load file.
                 var file = input.files[0];
-                var reader = new FileReader();
-                reader.onloadend = function(e) {
-                    FS.writeFile(file.name, new Int8Array(reader.result), {flags: 'w', encoding: 'binary'});
-                    meatamp.song = 0;
-                    meatamp.currentFile = file.name;
-                    meatOpenFile(file.name, meatamp.song);
-                    meatamp.controls.play();
-                    meatamp.updateInfo();
-                    meatamp.dom.mainDeck.shuffleTo(meatamp.METADATA_INDEX);
-                };
-                reader.readAsArrayBuffer(file);
+                meatamp.mediaFile = new GameMediaFile(meatamp.context, file);
             },
 
             showInfo: function(e) {
@@ -226,68 +285,12 @@
         }
     };
 
-    var audioPlayer = {
-        MAX_VOLUME: 0.0001,
-
-        paused: true,
-
-        init: function(synthCallback, bufferSize) {
-            audioPlayer.context = audioPlayer.createContext();
-            if (audioPlayer.context === null) {
-                console.log('Web Audio API support not found, audio will not play.');
-                return false;
-            }
-
-            audioPlayer.scriptProcessor = audioPlayer.createScriptProcessor(bufferSize);
-            audioPlayer.scriptProcessor.onaudioprocess = function(e) {
-                var left = e.outputBuffer.getChannelData(0);
-                var right = e.outputBuffer.getChannelData(1);
-                synthCallback(left, right, bufferSize);
-            };
-
-            audioPlayer.gain = audioPlayer.createGain();
-            audioPlayer.setVolume(0.5);
-
-            audioPlayer.scriptProcessor.connect(audioPlayer.gain);
-            audioPlayer.gain.connect(audioPlayer.context.destination);
-        },
-
-        setVolume: function(volume) {
-            audioPlayer.gain.gain.value = volume * audioPlayer.MAX_VOLUME;
-        },
-
-        createContext: function() {
-            if (window.AudioContext) {
-                return new AudioContext();
-            } else if (window.webkitAudioContext) {
-                return new webkitAudioContext();
-            } else {
-                return null;
-            }
-        },
-
-        createScriptProcessor: function(bufferSize) {
-            var func = (audioPlayer.context.createScriptProcessor ||
-                        audioPlayer.context.createJavaScriptNode ||
-                        noop);
-            return func.call(audioPlayer.context, bufferSize, 1, 2);
-        },
-
-        createGain: function() {
-            var func = (audioPlayer.context.createGain ||
-                        audioPlayer.context.createGainNode ||
-                        noop);
-            return func.call(audioPlayer.context);
-        }
-    };
-
     function noop() {
         return null;
     }
 
     $(document).on('DOMComponentsLoaded', function() {
         meatamp.init();
-        audioPlayer.init(meatamp.synthCallback, 8192);
         meatamp.bindControls();
     });
 })(window.jQuery, window.keymaster);
