@@ -2,99 +2,265 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no">
-
     <title>Meatamp</title>
-
     <link rel="stylesheet" type="text/css" href="css/reset.css">
     <link rel="stylesheet" type="text/css" href="css/fontello.css">
-    <link rel="stylesheet" type="text/css" href="css/brick-0.9.2.byob.min.css">
     <link rel="stylesheet" type="text/css" href="css/styles.css">
   </head>
   <body>
-    <main class="container">
-      <x-appbar class="top-bar" subheading="">
-        <h1>
-          <img src="img/icon-128.png" class="header-logo">
-          <span>Meatamp</span>
-        </h1>
-
-        <a href="#metadata" id="metadata-button" class="top-bar-icon" title="Song Info">
-          <i class="icon-th-list"></i>
-        </a>
-        <a href="#info" id="info-button" class="top-bar-icon" title="About Meatamp">
-          <i class="icon-info-circled-alt"></i>
-        </a>
-        <a href="https://github.com/Osmose/meatamp" class="top-bar-icon" title="Github page">
-          <i class="icon-github-circled-alt2"></i>
-        </a>
-        <a href="#install" id="install-button" class="top-bar-icon" title="Install as Open Web App">
-          <i class="icon-install"></i>
-        </a>
-      </x-appbar>
-
-      <div id="alert" class="msg">
-        <div class="dismiss"><i class="icon-cancel-circled-outline"></i></div>
-        <p></p>
-      </div>
-
-      <x-deck id="main-deck">
-        <x-card id="choose-file-msg" class="msg">
-          <p>Meatamp is a music player for video game sound formats, such as NSF, SPC, and GBS files.</p>
-          <p>You can grab some NSF files to test this out from <a href="http://chipmusic.org/music#t=nsf">chipmusic.org</a>.</p>
-          <p>Use the <i class="icon-folder-open"></i> button to select a file to play.</p>
-        </x-card>
-
-        <x-card id="info" class="msg">
-          <p>Meatamp was made by <a href="https://twitter.com/osmose">@Osmose</a>.</p>
-          <p>It uses <a href="http://www.slack.net/~ant/libs/audio.html#Game_Music_Emu">Game_Music_Emu by Blargg</a>, which is compiled to JavaScript via <a href="http://emscripten.org/">Emscripten</a>. The Game_Music_Emu page has info on which file formats are supported.</p>
-          <p>Meatamp has been tested on Firefox Nightly and Chrome. If you find bugs in other versions/browsers, feel free to <a href="https://github.com/Osmose/meatamp/issues">file an issue</a>, although I make no promises of issues ever getting fixed.</p>
-        </x-card>
-
-        <x-card class="metadata">
-          <figure class="system">
-            <img>
-          </figure>
-
-          <section class="file-info">
-            <h2 class="track-name"></h2>
-            <dl>
-              <dt>Track</dt>
-              <dd class="track"></dd>
-              <dt>System</dt>
-              <dd class="system-name"></dd>
-              <dt>Author</dt>
-              <dd class="author"></dd>
-              <dt>Copyright</dt>
-              <dd class="copyright"></dd>
-              <dt>Dumper</dt>
-              <dd class="dumper"></dd>
-              <dt>Comment</dt>
-              <dd class="comment"></dd>
-            </dl>
-          </section>
-        </x-card>
-      </x-deck>
-
-      <div class="controls">
-        <button id="prev" class="button"><i class="icon-to-start"></i></button>
-        <button id="play" class="button"><i class="icon-play"></i></button>
-        <button id="pause" class="button"><i class="icon-pause"></i></button>
-        <button id="next" class="button"><i class="icon-to-end"></i></button>
-        <div id="choose-file" class="button">
-          <i class="icon-folder-open"></i>
-          <input type="file">
+    <div class="container">
+      <div class="top-bar">
+        <div class="controls">
+          <button><i class="icon icon-to-start"></i></button>
+          <button><i class="icon icon-play"></i></button>
+          <button><i class="icon icon-to-end"></i></button>
+        </div>
+        <div class="current-song">
+          <span class="title">Title Theme</span>
+          <span class="artist">Koji Kondo</span>
+          <span class="track-info">1 / 12</span>
+          <span class="filename">Super_Mario_Bros.nsf</span>
+          <div class="progress-bar">[===========&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]</div>
         </div>
       </div>
-    </main>
-
-    <canvas id="emscripten"></canvas>
-
-    <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
-    <script src="js/keymaster.js"></script>
-    <script src="js/brick-0.9.2.byob.min.js"></script>
-    <script src="js/bootstrap.js"></script>
-    <script src="js/meatamp.js"></script>
-    <script src="js/player.js"></script>
+      <div class="main-panels">
+        <div class="sidebar">
+          <ul class="section-tree">
+            <li>
+              <span class="section-name">Files</span>
+              <ul class="file-tree">
+                <li>
+                  <span>MP3</span>
+                  <ul class="file-tree">
+                    <li><span>foo.mp3</span></li>
+                    <li><span>bar.mp3</span></li>
+                    <li><span>baz.mp3</span></li>
+                  </ul>
+                </li>
+                <li><span>GBC</span></li>
+                <li><span>GBA</span></li>
+                <li><span>Rock</span></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <div class="playlist">
+        <table>
+          <thead>
+            <tr>
+              <th>Track</th>
+              <th>Title</th>
+              <th>Artist</th>
+              <th>Album</th>
+              <th>Length</th>
+              <th>Filename</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>Title Theme</td>
+              <td>Koji Kondo</td>
+              <td>Super Mario Bros.</td>
+              <td>0:54</td>
+              <td>Super_Mario_Bros.nsf</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      </div>
+    </div>
   </body>
 </html>
