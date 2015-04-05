@@ -25,6 +25,70 @@
         return true;
     };
 
+    class PauseableAudioBufferSourceNode {
+        constructor(ctx, audioBuffer) {
+            this._ctx = ctx;
+            this._buffer = audioBuffer;
+            this._paused = false;
+            this._outNode = null;
+            this._startTime = 0; // Time when playback last started.
+            this._startOffset = 0; // Current position within the song, updated
+                                   // on pause.
+
+            this._source = this._createSource();
+        }
+
+        get paused() {
+            return this._paused;
+        }
+
+        set paused(paused) {
+            if (paused != this._paused) {
+                this._paused = paused;
+                if (paused) {
+                    this._source.stop();
+                    this._startOffset += this._ctx.currentTime - this._startTime;
+                } else {
+                    this._source = this._createSource();
+                    this.connect(this._outNode);
+                    this.start(0, this._startOffset % this._buffer.duration);
+                }
+            }
+        }
+
+        get currentTime() {
+            if (this.paused) {
+                return this._startOffset;
+            } else {
+                return this._ctx.currentTime - this._startTime + this._startOffset;
+            }
+        }
+
+        get duration() {
+            return this._buffer.duration;
+        }
+
+        _createSource() {
+            let source = this._ctx.createBufferSource();
+            source.buffer = this._buffer;
+            return source;
+        }
+
+        connect(outNode) {
+            this._outNode = outNode;
+            this._source.connect(outNode);
+        }
+
+        disconnect() {
+            this._source.disconnect();
+        }
+
+        start(...args) {
+            this._startTime = this._ctx.currentTime;
+            this._source.start(...args);
+        }
+    }
+
     class Player {
         constructor() {
             this._ctx = new AudioContext();
@@ -34,8 +98,7 @@
             this._currentSource = null;
             this._paused = false;
             this._buffer = null;
-            this._startTime = 0;
-            this._startOffset = 0;
+
         }
 
         get volume() {
@@ -59,57 +122,33 @@
         }
 
         get paused() {
-            return this._paused;
+            return this._currentSource ? this._currentSource.paused : false;
         }
 
         set paused(paused) {
-            if (paused != this._paused) {
-                this._paused = paused;
-                if (paused) {
-                    this.currentSource.stop();
-                    this._startOffset += this._ctx.currentTime - this._startTime;
-                } else {
-                    this.playAudioBuffer();
-                }
+            if (this._currentSource) {
+                this._currentSource.paused = paused;
             }
         }
 
         get currentTime() {
-            if (this._buffer) {
-                if (this.paused) {
-                    return this._startOffset;
-                } else {
-                    return this._ctx.currentTime - this._startTime + this._startOffset;
-                }
-            }
-
-            return null;
+            return this._currentSource ? this._currentSource.currentTime : null;
         }
 
         get duration() {
-            if (this._buffer) {
-                return this._buffer.duration;
-            }
+            return this._currentSource ? this._currentSource.duration : null;
+        }
 
-            return null;
+        play(source) {
+            this.currentSource = source;
+            this.currentSource.start(0);
         }
 
         playArrayBuffer(arrayBuffer) {
             this._ctx.decodeAudioData(arrayBuffer, (audioBuffer) => {
-                this.playAudioBuffer(audioBuffer);
+                let source = new PauseableAudioBufferSourceNode(this._ctx, audioBuffer);
+                this.play(source);
             });
-        }
-
-        playAudioBuffer(buffer=null) {
-            if (buffer) {
-                this._buffer = buffer;
-                this._startOffset = 0;
-            }
-
-            this._startTime = this._ctx.currentTime;
-            this.currentSource = this._ctx.createBufferSource();
-            this.currentSource.buffer = this._buffer;
-            this.currentSource.start(0, this._startOffset % this._buffer.duration);
         }
     }
 

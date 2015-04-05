@@ -1,3 +1,4 @@
+var addsrc = require('gulp-add-src');
 var argv = require('yargs').argv;
 var babel = require('gulp-babel');
 var del = require('del');
@@ -94,6 +95,8 @@ gulp.task('build.js', function() {
     return gulp.src('./public/js/*.js')
         .pipe(plumber())
         .pipe(babel())
+        .pipe(addsrc.append('./node_modules/gulp-babel/node_modules/' +
+                            'babel-core/browser-polyfill.js'))
         .pipe(gulp.dest('./build/js'));
 });
 
