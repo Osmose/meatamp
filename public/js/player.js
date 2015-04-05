@@ -1,4 +1,4 @@
-;(function($, key) {
+;(function($, key, id3) {
     'use strict';
 
     // Wrapped C functions for making the playback happen.
@@ -74,13 +74,33 @@
             }
         }
 
+        get currentTime() {
+            if (this._buffer) {
+                if (this.paused) {
+                    return this._startOffset;
+                } else {
+                    return this._ctx.currentTime - this._startTime + this._startOffset;
+                }
+            }
+
+            return null;
+        }
+
+        get duration() {
+            if (this._buffer) {
+                return this._buffer.duration;
+            }
+
+            return null;
+        }
+
         playArrayBuffer(arrayBuffer) {
             this._ctx.decodeAudioData(arrayBuffer, (audioBuffer) => {
                 this.playAudioBuffer(audioBuffer);
             });
         }
 
-        playAudioBuffer(buffer) {
+        playAudioBuffer(buffer=null) {
             if (buffer) {
                 this._buffer = buffer;
                 this._startOffset = 0;
@@ -93,20 +113,54 @@
         }
     }
 
+    function formatSeconds(seconds) {
+        let hours = Math.floor(seconds / 60);
+        seconds = Math.floor(seconds % 60);
+        return hours + ':' + (seconds < 10 ? 0 : '') + seconds;
+    }
+
     $(function() {
         let player = new Player();
+
+        let timeInterval = null;
+        let $currentTime = $('#current-time');
+        let $duration = $('#duration');
+
+        let $title = $('#title');
+        let $artist = $('#artist');
+        let $album = $('#album');
+        let $year = $('#year');
 
         $('#load').change((e) => {
             let file = e.target.files[0];
             let reader = new FileReader();
             reader.onload = (e) => {
-                player.playArrayBuffer(e.target.result);
+                let buffer = e.target.result;
+                player.playArrayBuffer(buffer);
             };
             reader.readAsArrayBuffer(file);
+
+            $title.text('Unknown');
+            $artist.text('Unknown');
+            $album.text('Unknown');
+            $year.text('---');
+            id3(file, (err, tags) => {
+                if (!err) {
+                    $title.text(tags.title);
+                    $artist.text(tags.artist);
+                    $album.text(tags.album);
+                    $year.text(tags.year);
+                }
+            });
         });
+
+        setInterval(() => {
+            $currentTime.text(formatSeconds(player.currentTime));
+            $duration.text(formatSeconds(player.duration));
+        }, 500);
 
         $('#pause').click((e) => {
             player.paused = !player.paused;
         });
     });
-})(window.jQuery, window.keymaster);
+})(window.jQuery, window.keymaster, window.id3);

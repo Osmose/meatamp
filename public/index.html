@@ -14,11 +14,19 @@
     <p>It's meatamp!</p>
     <input id="load" type="file">
     <button id="pause">Pause</button>
+    <p><span id="current-time"></span> / <span id="duration"></span></p>
+    <ul>
+      <li id="title"></li>
+      <li id="artist"></li>
+      <li id="album"></li>
+      <li id="year"></li>
+    </ul>
 
     <canvas id="emscripten"></canvas>
 
     <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
     <script src="js/lib/keymaster.js"></script>
+    <script src="js/lib/id3.min.js"></script>
     <script src="js/meatamp.js"></script>
     <script src="js/bootstrap.js"></script>
     <script src="js/player.js"></script>

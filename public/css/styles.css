@@ -8,7 +8,7 @@ body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-.emscripten {
+#emscripten {
     display: none;
 }
 
